@@ -25,19 +25,159 @@ To encrypt a message, one would break the message into digrams (groups of 2 lett
 
 ## ALGORITHM:
 
-STEP-1: Read the plain text from the user.
-STEP-2: Read the keyword from the user.
-STEP-3: Arrange the keyword without duplicates in a 5*5 matrix in the row order and fill the remaining cells with missed out letters in alphabetical order. Note that ‘i’ and ‘j’ takes the same cell.
-STEP-4: Group the plain text in pairs and match the corresponding corner letters by forming a rectangular grid.
-STEP-5: Display the obtained cipher text.
+STEP-1: Read the plain text from the user. 
+STEP-2: Read the keyword from the user. 
+STEP-3: Arrange the keyword without duplicates in a 5*5 matrix in the row order and fill the remaining cells with missed out letters in alphabetical order. Note that ‘i’ and ‘j’ takes the same cell. 
+STEP-4: Group the plain text in pairs and match the corresponding corner letters by forming a rectangular grid. 
+STEP-5: Display the obtained cipher text. 
 
 
 
 
 Program:
+```
+
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+
+char keyTable[5][5];
 
 
+void generateKeyTable(char key[])
+{
+    int used[26] = {0};
+    int i, j, k = 0;
 
+    for (i = 0; key[i] != '\0'; i++)
+    {
+        if (key[i] == 'J')
+            key[i] = 'I';
 
+        if (!used[key[i] - 'A'])
+        {
+            keyTable[k / 5][k % 5] = key[i];
+            used[key[i] - 'A'] = 1;
+            k++;
+        }
+    }
 
-Output:
+    for (i = 0; i < 26; i++)
+    {
+        if (i + 'A' == 'J')
+            continue;
+
+        if (!used[i])
+        {
+            keyTable[k / 5][k % 5] = i + 'A';
+            k++;
+        }
+    }
+}
+
+void findPosition(char ch, int *row, int *col)
+{
+    int i, j;
+    for (i = 0; i < 5; i++)
+    {
+        for (j = 0; j < 5; j++)
+        {
+            if (keyTable[i][j] == ch)
+            {
+                *row = i;
+                *col = j;
+                return;
+            }
+        }
+    }
+}
+
+void encrypt(char text[])
+{
+    int i, r1, c1, r2, c2;
+    char a, b;
+
+    for (i = 0; i < strlen(text); i += 2)
+    {
+        a = text[i];
+        b = text[i + 1];
+
+        findPosition(a, &r1, &c1);
+        findPosition(b, &r2, &c2);
+
+        if (r1 == r2)
+        {
+            printf("%c%c ",
+                   keyTable[r1][(c1 + 1) % 5],
+                   keyTable[r2][(c2 + 1) % 5]);
+        }
+        else if (c1 == c2)
+        {
+            printf("%c%c ",
+                   keyTable[(r1 + 1) % 5][c1],
+                   keyTable[(r2 + 1) % 5][c2]);
+        }
+        else
+        {
+            printf("%c%c ",
+                   keyTable[r1][c2],
+                   keyTable[r2][c1]);
+        }
+    }
+}
+
+int main()
+{
+    char key[50], plaintext[50];
+    int i, j = 0;
+
+    printf("Enter key: ");
+    scanf("%s", key);
+
+    printf("Enter plaintext: ");
+    scanf("%s", plaintext);
+
+    for (i = 0; key[i]; i++)
+        key[i] = toupper(key[i]);
+
+    for (i = 0; plaintext[i]; i++)
+        plaintext[i] = toupper(plaintext[i]);
+
+    for (i = 0; plaintext[i]; i++)
+    {
+        if (plaintext[i] == plaintext[i + 1])
+        {
+            memmove(&plaintext[i + 2], &plaintext[i + 1],
+                    strlen(plaintext) - i);
+            plaintext[i + 1] = 'X';
+        }
+    }
+
+    if (strlen(plaintext) % 2 != 0)
+        strcat(plaintext, "X");
+
+    generateKeyTable(key);
+
+    printf("\nKey Table:\n");
+    for (i = 0; i < 5; i++)
+    {
+        for (j = 0; j < 5; j++)
+            printf("%c ", keyTable[i][j]);
+        printf("\n");
+    }
+
+    printf("\nCipher Text: ");
+    encrypt(plaintext);
+
+    return 0;
+}
+```
+
+## Output:
+
+<img width="505" height="331" alt="Screenshot 2026-01-30 093403" src="https://github.com/user-attachments/assets/4bafdc01-f634-449d-b796-dfaf257d331f" />
+
+## RESULT:
+
+Thus the Python program to implement the Playfair Substitution technique was completed and successfully executed.
+
